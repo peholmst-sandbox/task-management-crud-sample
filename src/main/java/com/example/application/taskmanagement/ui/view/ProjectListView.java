@@ -63,8 +63,7 @@ class ProjectListView extends MasterDetailLayout implements AfterNavigationObser
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         refresh();
-        event.getRouteParameters()
-                .getLong(TaskListView.PARAM_PROJECT_ID)
+        event.getRouteParameters().getLong(TaskListView.PARAM_PROJECT_ID)
                 .flatMap(projectService::findProjectListItemById)
                 .ifPresentOrElse(projectList.grid::select, projectList.grid::deselectAll);
     }
@@ -149,7 +148,8 @@ class ProjectListView extends MasterDetailLayout implements AfterNavigationObser
 
             setSizeFull();
             addClassNames("project-list", Display.FLEX, FlexDirection.COLUMN);
-            var toolbar = new SectionToolbar(SectionToolbar.group(new DrawerToggle(), title), addProjectButton).withRow(searchField).withRow(sortField);
+            var toolbar = new SectionToolbar(SectionToolbar.group(new DrawerToggle(), title), addProjectButton)
+                    .withRow(searchField).withRow(sortField);
             add(toolbar, grid);
         }
 

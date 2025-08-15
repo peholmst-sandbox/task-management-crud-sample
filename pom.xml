@@ -16,6 +16,7 @@
         <archunit.version>1.4.1</archunit.version>
         <keycloak.version>26.0.5</keycloak.version>
         <spring-modulith.version>1.4.2</spring-modulith.version>
+        <testcontainers-keycloak.version>3.8.0</testcontainers-keycloak.version>
     </properties>
 
     <parent>
@@ -74,9 +75,8 @@
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <!-- Remove if you are not going to use Control Center -->
             <groupId>com.vaadin</groupId>
-            <artifactId>control-center-starter</artifactId>
+            <artifactId>sso-kit-starter</artifactId>
         </dependency>
 
         <!-- Persistence -->
@@ -158,6 +158,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <version>${testcontainers-keycloak.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

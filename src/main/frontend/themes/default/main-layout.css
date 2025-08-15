@@ -53,3 +53,7 @@ vaadin-drawer-toggle {
 .main-layout .user-menu vaadin-menu-bar-button::part(label):hover {
     color: var(--dark-primary-contrast-color);
 }
+
+.main-layout .user-menu vaadin-avatar {
+    background-color: var(--lumo-tint-50pct);
+}

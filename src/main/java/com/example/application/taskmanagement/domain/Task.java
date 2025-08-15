@@ -1,8 +1,6 @@
 package com.example.application.taskmanagement.domain;
 
 import com.example.application.base.domain.AbstractEntity;
-import com.example.application.security.domain.UserId;
-import com.example.application.security.domain.jpa.UserIdAttributeConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
@@ -67,9 +65,8 @@ public class Task extends AbstractEntity<Long> {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "task_assignee", joinColumns = @JoinColumn(name = "task_id"))
-    @Convert(converter = UserIdAttributeConverter.class)
     @Column(name = "assignee", nullable = false)
-    private Set<UserId> assignees = new HashSet<>();
+    private Set<String> assignees = new HashSet<>();
 
     protected Task() { // To keep Hibernate happy
     }
@@ -156,11 +153,11 @@ public class Task extends AbstractEntity<Long> {
         this.priority = requireNonNull(priority);
     }
 
-    public Set<UserId> getAssignees() {
+    public Set<String> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(Set<UserId> assignees) {
+    public void setAssignees(Set<String> assignees) {
         this.assignees = requireNonNull(assignees);
     }
 }

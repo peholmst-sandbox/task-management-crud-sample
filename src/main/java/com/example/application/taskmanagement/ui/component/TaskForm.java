@@ -1,8 +1,6 @@
 package com.example.application.taskmanagement.ui.component;
 
-import com.example.application.security.AppUserInfo;
 import com.example.application.security.AppUserInfoLookup;
-import com.example.application.security.domain.UserId;
 import com.example.application.taskmanagement.domain.Task;
 import com.example.application.taskmanagement.domain.TaskPriority;
 import com.example.application.taskmanagement.domain.TaskStatus;
@@ -15,6 +13,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import org.springframework.security.oauth2.core.oidc.StandardClaimAccessor;
 
 import java.time.format.TextStyle;
 import java.util.Optional;
@@ -58,8 +57,7 @@ public class TaskForm extends Composite<FormLayout> {
         var dueDateFieldBinding = binder.forField(dueDateField)
                 .withValidator(date -> date != null || dueTimeField.isEmpty(), "Specify a due date")
                 .bind(Task::getDueDate, Task::setDueDate);
-        binder.forField(dueTimeField)
-                .bind(Task::getDueTime, Task::setDueTime);
+        binder.forField(dueTimeField).bind(Task::getDueTime, Task::setDueTime);
         dueTimeField.addValueChangeListener(event -> dueDateFieldBinding.validate());
         binder.forField(statusField).asRequired().bind(Task::getStatus, Task::setStatus);
         binder.forField(priorityField).asRequired().bind(Task::getPriority, Task::setPriority);
@@ -68,12 +66,13 @@ public class TaskForm extends Composite<FormLayout> {
         setFormDataObject(initialFormDataObject);
     }
 
-    private static MultiSelectComboBox<UserId> createAssigneesField(AppUserInfoLookup appUserInfoLookup) {
-        var assigneesField = new MultiSelectComboBox<UserId>("Assignees");
+    private static MultiSelectComboBox<String> createAssigneesField(AppUserInfoLookup appUserInfoLookup) {
+        var assigneesField = new MultiSelectComboBox<String>("Assignees");
         assigneesField.setItemLabelGenerator(
-                userId -> appUserInfoLookup.findUserInfo(userId).map(AppUserInfo::getFullName).orElse("N/A"));
-        assigneesField.setItems(query -> query.getFilter().map(searchTerm -> appUserInfoLookup
-                .findUsers(searchTerm, query.getLimit(), query.getOffset()).stream().map(AppUserInfo::getUserId))
+                userId -> appUserInfoLookup.findUserInfo(userId).map(StandardClaimAccessor::getFullName).orElse("N/A"));
+        assigneesField.setItems(query -> query.getFilter()
+                .map(searchTerm -> appUserInfoLookup.findUsers(searchTerm, query.getLimit(), query.getOffset()).stream()
+                        .map(StandardClaimAccessor::getSubject))
                 .orElse(Stream.empty()));
         return assigneesField;
     }

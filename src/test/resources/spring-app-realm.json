@@ -1,0 +1,109 @@
+{
+  "realm": "spring-app",
+  "enabled": true,
+  "displayName": "CRUD Example",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "spring-boot-app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        }
+      ],
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "your-client-secret",
+      "redirectUris": [
+        "http://localhost:8080/login/oauth2/code/keycloak",
+        "http://localhost:8080"
+      ],
+      "webOrigins": [
+        "http://localhost:8080"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "john.doe",
+      "enabled": true,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@company.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "attributes": {
+        "department": [
+          "Engineering"
+        ],
+        "employee_id": [
+          "EMP001"
+        ]
+      }
+    },
+    {
+      "username": "jane.admin",
+      "enabled": true,
+      "firstName": "Jane",
+      "lastName": "Admin",
+      "email": "jane.admin@company.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "admin"
+      ],
+      "attributes": {
+        "department": [
+          "IT"
+        ],
+        "employee_id": [
+          "EMP002"
+        ]
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Standard user role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
+    ]
+  }
+}

@@ -3,7 +3,6 @@ package com.example.application.taskmanagement.ui.view;
 import com.example.application.base.ui.component.*;
 import com.example.application.security.AppRoles;
 import com.example.application.security.AppUserInfoLookup;
-import com.example.application.security.CurrentUser;
 import com.example.application.taskmanagement.domain.Project;
 import com.example.application.taskmanagement.domain.Task;
 import com.example.application.taskmanagement.domain.TaskPriority;
@@ -57,19 +56,18 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
     private final TaskService taskService;
     private final H2 title;
     private final TaskList taskList;
-    private final ZoneId timeZone;
+    private final ZoneId timeZone = ZoneId.systemDefault(); // TODO Get the timezone from the user's browser
     private final boolean isAdmin;
 
     @Nullable
     private Project project;
 
-    TaskListView(AuthenticationContext authenticationContext, CurrentUser currentUser,
-                 AppUserInfoLookup appUserInfoLookup, TaskService taskService) {
+    TaskListView(AuthenticationContext authenticationContext, AppUserInfoLookup appUserInfoLookup,
+            TaskService taskService) {
         isAdmin = authenticationContext.hasRole(AppRoles.ADMIN);
 
         this.appUserInfoLookup = appUserInfoLookup;
         this.taskService = taskService;
-        this.timeZone = currentUser.require().getZoneId();
 
         title = new H2("");
 
@@ -104,7 +102,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
             throw new IllegalStateException("Cannot add task: project is null");
         }
 
-        var dialog = new AddTaskDialog(appUserInfoLookup, () -> taskService.createTask(project), newTask -> {
+        var dialog = new AddTaskDialog(appUserInfoLookup, () -> new Task(project, timeZone), newTask -> {
             taskService.saveTask(newTask);
             refresh();
             notifyProjectTasksChanged();
@@ -193,7 +191,9 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
 
             grid = new Grid<>();
             grid.setSelectionMode(Grid.SelectionMode.NONE);
-            grid.setItemsPageable(pageable -> project == null ? Collections.emptyList() : taskService.findTasks(project, filter, pageable));
+            grid.setItemsPageable(pageable -> project == null
+                    ? Collections.emptyList()
+                    : taskService.findTasks(project, filter, pageable));
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
             grid.addColumn(new ComponentRenderer<>(this::createStatusBadge)).setHeader("Status").setWidth("150px")
                     .setFlexGrow(0).setSortProperty(Task.STATUS_SORT_PROPERTY);
@@ -234,10 +234,10 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
 
         private Component createStatusBadge(Task task) {
             return switch (task.getStatus()) {
-                case PENDING -> Badges.createContrast(task.getStatus().getDisplayName());
-                case PLANNED, IN_PROGRESS -> Badges.createDefault(task.getStatus().getDisplayName());
-                case PAUSED -> Badges.createError(task.getStatus().getDisplayName());
-                case DONE -> Badges.createSuccess(task.getStatus().getDisplayName());
+            case PENDING -> Badges.createContrast(task.getStatus().getDisplayName());
+            case PLANNED, IN_PROGRESS -> Badges.createDefault(task.getStatus().getDisplayName());
+            case PAUSED -> Badges.createError(task.getStatus().getDisplayName());
+            case DONE -> Badges.createSuccess(task.getStatus().getDisplayName());
             };
         }
 
@@ -246,18 +246,18 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
             var themeList = badge.getElement().getThemeList();
             themeList.add("badge");
             switch (task.getPriority()) {
-                case URGENT -> {
-                    themeList.add("error");
-                }
-                case HIGH -> {
-                    themeList.add("warning");
-                }
-                case NORMAL -> {
-                    // Default style
-                }
-                case LOW -> {
-                    themeList.add("success");
-                }
+            case URGENT -> {
+                themeList.add("error");
+            }
+            case HIGH -> {
+                themeList.add("warning");
+            }
+            case NORMAL -> {
+                // Default style
+            }
+            case LOW -> {
+                themeList.add("success");
+            }
             }
             return badge;
         }
@@ -283,7 +283,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
 
             var assignees = new AvatarGroup();
             task.getAssignees().stream().flatMap(userId -> appUserInfoLookup.findUserInfo(userId).stream())
-                    .map(userInfo -> new AvatarGroup.AvatarGroupItem(userInfo.getFullName(), userInfo.getPictureUrl()))
+                    .map(userInfo -> new AvatarGroup.AvatarGroupItem(userInfo.getFullName(), userInfo.getPicture()))
                     .forEach(assignees::add);
             return assignees;
         }
@@ -314,8 +314,10 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
             var dueDateTime = task.getDueDateTimeInZone(timeZone);
             if (dueDateTime != null) {
                 var dueDiv = new Div();
-                dueDiv.setText("Due on %s at %s".formatted(dateFormatter.format(dueDateTime), timeFormatter.format(dueDateTime)));
-                dueDiv.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.XSMALL, LumoUtility.Padding.Top.MEDIUM);
+                dueDiv.setText("Due on %s at %s".formatted(dateFormatter.format(dueDateTime),
+                        timeFormatter.format(dueDateTime)));
+                dueDiv.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.XSMALL,
+                        LumoUtility.Padding.Top.MEDIUM);
                 card.add(dueDiv);
             }
             card.addToFooter(createAssignees(task));

@@ -1,13 +1,13 @@
 package com.example.application.security;
 
-import com.example.application.security.domain.UserId;
+import org.springframework.security.oauth2.core.oidc.StandardClaimAccessor;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AppUserInfoLookup {
 
-    Optional<AppUserInfo> findUserInfo(UserId userId);
+    Optional<StandardClaimAccessor> findUserInfo(String userId);
 
-    List<AppUserInfo> findUsers(String searchTerm, int limit, int offset);
+    List<StandardClaimAccessor> findUsers(String searchTerm, int limit, int offset);
 }
