@@ -2,7 +2,7 @@ package com.example.application.taskmanagement.ui.view;
 
 import com.example.application.base.ui.component.*;
 import com.example.application.security.AppRoles;
-import com.example.application.security.AppUserInfoLookup;
+import com.example.application.security.UserInfoLookup;
 import com.example.application.taskmanagement.domain.Project;
 import com.example.application.taskmanagement.domain.Task;
 import com.example.application.taskmanagement.domain.TaskPriority;
@@ -52,7 +52,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
 
     public static final String PARAM_PROJECT_ID = "projectId";
 
-    private final AppUserInfoLookup appUserInfoLookup;
+    private final UserInfoLookup userInfoLookup;
     private final TaskService taskService;
     private final H2 title;
     private final TaskList taskList;
@@ -62,11 +62,10 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
     @Nullable
     private Project project;
 
-    TaskListView(AuthenticationContext authenticationContext, AppUserInfoLookup appUserInfoLookup,
-            TaskService taskService) {
+    TaskListView(AuthenticationContext authenticationContext, UserInfoLookup userInfoLookup, TaskService taskService) {
         isAdmin = authenticationContext.hasRole(AppRoles.ADMIN);
 
-        this.appUserInfoLookup = appUserInfoLookup;
+        this.userInfoLookup = userInfoLookup;
         this.taskService = taskService;
 
         title = new H2("");
@@ -102,7 +101,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
             throw new IllegalStateException("Cannot add task: project is null");
         }
 
-        var dialog = new AddTaskDialog(appUserInfoLookup, () -> new Task(project, timeZone), newTask -> {
+        var dialog = new AddTaskDialog(userInfoLookup, () -> new Task(project, timeZone), newTask -> {
             taskService.saveTask(newTask);
             refresh();
             notifyProjectTasksChanged();
@@ -113,7 +112,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
     }
 
     private void editTask(Task task) {
-        var dialog = new EditTaskDialog(appUserInfoLookup, task, editedTask -> {
+        var dialog = new EditTaskDialog(userInfoLookup, task, editedTask -> {
             refreshTask(taskService.saveTask(editedTask));
             notifyProjectTasksChanged();
             Notifications.createNonCriticalNotification(new SvgIcon("icons/check.svg"), "Task updated successfully",
@@ -282,7 +281,7 @@ class TaskListView extends Main implements AfterNavigationObserver, HasDynamicTi
             }
 
             var assignees = new AvatarGroup();
-            task.getAssignees().stream().flatMap(userId -> appUserInfoLookup.findUserInfo(userId).stream())
+            task.getAssignees().stream().flatMap(userId -> userInfoLookup.findUserInfo(userId).stream())
                     .map(userInfo -> new AvatarGroup.AvatarGroupItem(userInfo.getFullName(), userInfo.getPicture()))
                     .forEach(assignees::add);
             return assignees;

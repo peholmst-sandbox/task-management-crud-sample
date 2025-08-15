@@ -1,6 +1,6 @@
 package com.example.application.taskmanagement.ui.component;
 
-import com.example.application.security.AppUserInfoLookup;
+import com.example.application.security.UserInfoLookup;
 import com.example.application.taskmanagement.domain.Task;
 import com.example.application.taskmanagement.domain.TaskPriority;
 import com.example.application.taskmanagement.domain.TaskStatus;
@@ -25,7 +25,7 @@ public class TaskForm extends Composite<FormLayout> {
     private final TimePicker dueTimeField;
     private Task formDataObject;
 
-    public TaskForm(AppUserInfoLookup appUserInfoLookup, Task initialFormDataObject) {
+    public TaskForm(UserInfoLookup userInfoLookup, Task initialFormDataObject) {
         var descriptionField = new TextField("Description");
         descriptionField.setPlaceholder("Enter a description");
 
@@ -41,7 +41,7 @@ public class TaskForm extends Composite<FormLayout> {
         priorityField.setItems(TaskPriority.values());
         priorityField.setItemLabelGenerator(TaskPriority::getDisplayName);
 
-        var assigneesField = createAssigneesField(appUserInfoLookup);
+        var assigneesField = createAssigneesField(userInfoLookup);
 
         var formLayout = getContent();
         formLayout.setMaxWidth("640px");
@@ -66,12 +66,12 @@ public class TaskForm extends Composite<FormLayout> {
         setFormDataObject(initialFormDataObject);
     }
 
-    private static MultiSelectComboBox<String> createAssigneesField(AppUserInfoLookup appUserInfoLookup) {
+    private static MultiSelectComboBox<String> createAssigneesField(UserInfoLookup userInfoLookup) {
         var assigneesField = new MultiSelectComboBox<String>("Assignees");
         assigneesField.setItemLabelGenerator(
-                userId -> appUserInfoLookup.findUserInfo(userId).map(StandardClaimAccessor::getFullName).orElse("N/A"));
+                userId -> userInfoLookup.findUserInfo(userId).map(StandardClaimAccessor::getFullName).orElse("N/A"));
         assigneesField.setItems(query -> query.getFilter()
-                .map(searchTerm -> appUserInfoLookup.findUsers(searchTerm, query.getLimit(), query.getOffset()).stream()
+                .map(searchTerm -> userInfoLookup.findUsers(searchTerm, query.getLimit(), query.getOffset()).stream()
                         .map(StandardClaimAccessor::getSubject))
                 .orElse(Stream.empty()));
         return assigneesField;

@@ -21,19 +21,18 @@ import static java.util.Objects.requireNonNull;
  * <li>Have the following service account roles: {@code view-users}, {@code query-users}</li>
  * </ul>
  */
-class KeycloakAppUserInfoLookup implements AppUserInfoLookup, AutoCloseable {
+public class UserInfoLookup implements AutoCloseable {
 
-    private static final Logger log = LoggerFactory.getLogger(KeycloakAppUserInfoLookup.class);
+    private static final Logger log = LoggerFactory.getLogger(UserInfoLookup.class);
 
     private final Keycloak keycloak;
     private final String realm;
 
-    KeycloakAppUserInfoLookup(Keycloak keycloak, String realm) {
+    UserInfoLookup(Keycloak keycloak, String realm) {
         this.keycloak = requireNonNull(keycloak, "keycloak must not be null");
         this.realm = requireNonNull(realm, "realm must not be null");
     }
 
-    @Override
     public Optional<StandardClaimAccessor> findUserInfo(String userId) {
         try {
             log.debug("Looking up user info for userId: {}", userId);
@@ -48,7 +47,6 @@ class KeycloakAppUserInfoLookup implements AppUserInfoLookup, AutoCloseable {
         }
     }
 
-    @Override
     public List<StandardClaimAccessor> findUsers(String searchTerm, int limit, int offset) {
         log.debug("Looking up users from searchTerm: {} (limit: {}, offset: {})", searchTerm, limit, offset);
         var users = keycloak.realm(realm).users().search(searchTerm, offset, limit);

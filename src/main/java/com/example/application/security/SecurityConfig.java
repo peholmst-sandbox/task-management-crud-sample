@@ -19,8 +19,8 @@ import java.util.Set;
 class SecurityConfig {
 
     @Bean
-    KeycloakAppUserInfoLookup appUserInfoLookup(Keycloak keycloak, @Value("${app.keycloak.realm}") String realm) {
-        return new KeycloakAppUserInfoLookup(keycloak, realm);
+    UserInfoLookup userInfoLookup(Keycloak keycloak, @Value("${app.keycloak.realm}") String realm) {
+        return new UserInfoLookup(keycloak, realm);
     }
 
     @Bean
