@@ -1,9 +1,11 @@
 package com.example.application.security;
 
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,5 +43,20 @@ class SecurityConfig {
 
             return mappedAuthorities;
         };
+    }
+
+    @Bean
+    @Profile("prod")
+    Keycloak keycloakAdminClient(@Value("${app.keycloak.admin.client-id}") String clientId,
+                                 @Value("${app.keycloak.admin.client-secret}") String clientSecret,
+                                 @Value("${app.keycloak.admin.url}") String serverUrl,
+                                 @Value("${app.keycloak.realm}") String realm) {
+        return KeycloakBuilder.builder()
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .serverUrl(serverUrl)
+                .realm(realm)
+                .grantType("client_credentials")
+                .build();
     }
 }
